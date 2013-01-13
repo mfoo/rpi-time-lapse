@@ -100,6 +100,8 @@
       }
 
       function refreshUI(options) {
+        jQuery("div.btn").attr("disabled", "disabled");
+
         // Display the buttons based on the status
         if(options.status == 'stopped') {
           toggleButtonState(true, false, false, false, true);
@@ -119,6 +121,8 @@
         jQuery("#timelapse-label").text(options.status);
         jQuery("#photo-count").text(options.photo_count + "");
         jQuery("#start-time").text(options.started_at == null ? "Not yet started" : options.started_at);
+
+        jQuery("div.btn").removeAttr("disabled");
       }
 
       function update() {
