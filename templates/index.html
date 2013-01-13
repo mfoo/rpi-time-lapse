@@ -132,18 +132,18 @@
         });
       }
 
-      update();
-
       function continuousUpdate() {
         spinner.spin();
         update();
-        setTimeout(continuousUpdate, 2000);
         spinner.stop();
+        timerId = setTimeout(continuousUpdate, 2000);
       }
+
+      continuousUpdate();
 
       jQuery("body").on("click", "#start-button", function() {
         jQuery.get('/start','none', function(data) {
-          setTimeout(continuousUpdate, 2000);
+          update();
         });
       });
 
