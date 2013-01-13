@@ -149,7 +149,25 @@
 
       jQuery("body").on("click", "#stop-button", function() {
         jQuery.get('/stop','none', function(data) {
-          alert(data);
+          update();
+        });
+      });
+
+      jQuery("body").on("click", "#pause-button", function() {
+        jQuery.get('/pause','none', function(data) {
+          update();
+        });
+      });
+
+      jQuery("body").on("click", "#continue-button", function() {
+        jQuery.get('/continue','none', function(data) {
+          update();
+        });
+      });
+
+      jQuery("body").on("click", "#rewind-button", function() {
+        jQuery.get('/rewind','none', function(data) {
+          update();
         });
       });
   });

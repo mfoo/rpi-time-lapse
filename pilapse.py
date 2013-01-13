@@ -27,6 +27,9 @@ urls = (
   '/static/.+', 'static',
   '/start', 'start',
   '/stop', 'stop',
+  '/pause', 'pause',
+  '/continue', 'resume',
+  '/rewind', 'rewind',
   '/status', 'status',
   '/', 'index'
 )
@@ -96,6 +99,7 @@ class TimeLapse:
     self.status = TimeLapse.STOPPED
     self.started_time = None
     self.stopping = False
+    self.step_count = 0
 
   def start(self):
     print "TimeLapse start"
@@ -118,6 +122,8 @@ class TimeLapse:
     self.motor.step(1)
     self.camera.shutter()
 
+    self.step_count = self.step_count + 1
+
     t = Timer(1, self.step)
     t.start()
 
@@ -133,6 +139,11 @@ class TimeLapse:
   def stop(self):
     print "TimeLapse stop"
     self.stopping = True
+
+  def rewind(self):
+    # TODO: Add another pin so that the motor can be wound backwards.
+    # TODO: use self.stepping_count
+    pass
 
   def get_status_string(self):
     if self.status == TimeLapse.RUNNING:
@@ -176,6 +187,25 @@ class stop:
   """Stop the time lapse"""
   def GET(self):
     timelapse.stop()
+    return "Success"
+
+class pause:
+  """Pause the time lapse"""
+  def GET(self):
+    timelapse.pause()
+    return "Success"
+
+class resume:
+  """Resume the timelapse after it was paused"""
+  def GET(self):
+    timelapse.resume()
+    return "Success"
+
+class rewind:
+  """Reset the camera to it's original position"""
+  def GET(self):
+    timelapse.stop()
+    timelapse.rewind()
     return "Success"
 
 class status:
