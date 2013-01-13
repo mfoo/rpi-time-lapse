@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Time Lapse Photograph System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TODO">
+  <meta name="author" content="Martin Foot">
+  <link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+ <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+  </style>
+  <link href="static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet"> 
+</head>
+<body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="#">Project name</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Bootstrap starter template</h1>
+    <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
+
+    <div class="well">
+      <h2>System overview</h2>
+      <h3>Status:</h3> <span id="timelapse-label" class="label"></span>
+      <br />
+      <h3>Photo count:</h3><p id="photo-count"></p>
+      <h3>Start time:</h3><p id="start-time"></p>
+      <br />
+      <div id="pause-button" class="btn btn-warning">Pause</div>
+      <div id="continue-button" class="btn btn-success">Continue</div>
+      <div id="stop-button" class="btn btn-important">Stop</div>
+      <div id="start-button" class="btn btn-success">Start</div>
+      <div id="rewind-button" class="btn btn-primary">Rewind</div>
+    </div>
+  </div>
+
+<script src="static/spin.min.js"></script>
+<script src="static/jquery-1.8.3.min.js"></script>
+<script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  var spinnerOptions = {
+    lines: 11, // The number of lines to draw
+    length: 7, // The length of each line
+    width: 6, // The line thickness
+    radius: 10, // The radius of the inner circle
+    corners: 1, // Corner roundness (0..1)
+    rotate: 0, // The rotation offset
+    color: '#000', // #rgb or #rrggbb
+    speed: 1, // Rounds per second
+    trail: 60, // Afterglow percentage
+    shadow: false, // Whether to render a shadow
+    hwaccel: false, // Whether to use hardware acceleration
+    className: 'spinner', // The CSS class to assign to the spinner
+    zIndex: 2e9, // The z-index (defaults to 2000000000)
+    top: 'auto', // Top position relative to parent in px
+    left: 'auto' // Left position relative to parent in px
+  };
+
+  jQuery(document).ready(function() {
+      // Start by adding the spinner
+      var well = jQuery(".well");
+      var spinner = new Spinner(spinnerOptions).spin(well);
+
+      var timerId = 0;
+
+      // Hide all buttons on page load
+      jQuery("div.button").hide();
+
+      function toggleButtonState(start, stop, pause, cont, rewind) {
+        var startButton = jQuery("#start-button");
+        var stopButton = jQuery("#stop-button");
+        var pauseButton = jQuery("#pause-button");
+        var continueButton = jQuery("#continue-button");
+        var rewindButton = jQuery("#rewind-button");
+        if(start) { startButton.show() } else { startButton.hide(); }
+        if(stop) { stopButton.show() } else { stopButton.hide(); }
+        if(pause) { pauseButton.show() } else { pauseButton.hide(); }
+        if(cont) { continueButton.show() } else { continueButton.hide(); }
+        if(rewind) { rewindButton.show() } else { rewindButton.hide(); }
+      }
+
+      function refreshUI(options) {
+        // Display the buttons based on the status
+        if(options.status == 'stopped') {
+          toggleButtonState(true, false, false, false, true);
+        } else if(options.status == 'running') {
+          toggleButtonState(false, true, true, false, false);
+        } else if(options.status == 'paused') {
+          toggleButtonState(false, true, false, true, false);
+        }
+
+        // Strip any 'label-*' classes from the status label
+        jQuery("#timelapse-label").removeClass(function (index, css) {
+          return (css.match (/\blabel-\S+/g) || []).join(' ');
+        });
+
+        // Add the appropriate label back in
+        jQuery("#timelapse-label").addClass("label-" + options.bootstrap_label);
+        jQuery("#timelapse-label").text(options.status);
+        jQuery("#photo-count").text(options.photo_count + "");
+        jQuery("#start-time").text(options.started_at == null ? "Not yet started" : options.started_at);
+      }
+
+      function update() {
+        // When the page loads, fetch the status and render
+        jQuery.get('/status', function(data, textStatus, xhr) {
+          refreshUI(JSON.parse(data));
+        });
+      }
+
+      update();
+
+      function continuousUpdate() {
+        spinner.spin();
+        update();
+        setTimeout(continuousUpdate, 2000);
+        spinner.stop();
+      }
+
+      jQuery("body").on("click", "#start-button", function() {
+        jQuery.get('/start','none', function(data) {
+          setTimeout(continuousUpdate, 2000);
+        });
+      });
+
+      jQuery("body").on("click", "#stop-button", function() {
+        jQuery.get('/stop','none', function(data) {
+          alert(data);
+        });
+      });
+  });
+</script>
+</body>
+</html>
